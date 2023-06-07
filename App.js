@@ -1,20 +1,37 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { View, TextInput, Button, Text } from 'react-native';
+import axios from 'axios';
 
-export default function App() {
+const App = () => {
+  const [value, setValue] = useState('');
+  const [result, setResult] = useState('');
+
+  const handleConversion = async () => {
+    try {
+      const response = await axios.get(
+        'https://api.exchangerate-api.com/v4/latest/USD'
+      );
+      const exchangeRates = response.data.rates;
+      const convertedValue = (parseFloat(value) * exchangeRates.EUR).toFixed(2);
+      setResult(`${value} USD = ${convertedValue} EUR`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <TextInput
+        style={{ marginBottom: 10, paddingHorizontal: 10, borderWidth: 1 }}
+        placeholder="Digite o valor em USD"
+        value={value}
+        onChangeText={(text) => setValue(text)}
+        keyboardType="numeric"
+      />
+      <Button title="Converter" onPress={handleConversion} />
+      {result ? <Text style={{ marginTop: 10 }}>{result}</Text> : null}
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
